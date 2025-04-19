@@ -2,7 +2,6 @@ let scene, camera, renderer;
 let buildingModel, arrowModel;
 let arrows = [];
 let destination = '';
-
 const pathData = {
   room1: [[0, 0, 0], [1, 0, 0], [2, 0, 0]],
   lab: [[0, 0, 0], [0, 0, 1], [0, 0, 2]],
@@ -12,10 +11,7 @@ const pathData = {
 let arrowPositions = [];
 let currentPathIndex = 0;
 
-window.addEventListener('DOMContentLoaded', () => {
-  init();           // Initialize scene and models
-  enableCamera();   // Start camera immediately on load
-});
+init();
 
 function init() {
   scene = new THREE.Scene();
@@ -30,13 +26,11 @@ function init() {
   scene.add(light);
 
   const loader = new THREE.GLTFLoader();
-
-  loader.load('models/building.glb', (gltf) => {
+  loader.load('models/3d.glb', function (gltf) {
     buildingModel = gltf.scene;
     scene.add(buildingModel);
   });
-
-  loader.load('models/arrow.glb', (gltf) => {
+  loader.load('models/arrow.glb', function (gltf) {
     arrowModel = gltf.scene;
   });
 
@@ -46,20 +40,22 @@ function init() {
     destination = e.target.value;
   });
 
+  enableCameraBackground();
   animate();
 }
 
-function enableCamera() {
+function enableCameraBackground() {
   navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
     .then((stream) => {
       const video = document.createElement('video');
-      video.setAttribute('playsinline', '');
-      video.setAttribute('autoplay', '');
+      video.setAttribute('playsinline', 'true');
       video.muted = true;
+      video.autoplay = true;
       video.srcObject = stream;
 
       video.onloadedmetadata = () => {
         video.play();
+
         const videoTexture = new THREE.VideoTexture(video);
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
@@ -70,7 +66,7 @@ function enableCamera() {
     })
     .catch((err) => {
       console.error("Camera access error:", err);
-      scene.background = new THREE.Color(0x000000); // fallback background
+      scene.background = new THREE.Color(0x000000);
     });
 }
 
