@@ -1,3 +1,7 @@
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.module.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.149.0/examples/jsm/loaders/GLTFLoader.js';
+import { TWEEN } from 'https://cdn.jsdelivr.net/npm/tween.js@18.6.4/dist/tween.esm.js';
+
 let scene, camera, renderer;
 let buildingModel, arrowModel;
 let arrows = [];
@@ -25,7 +29,7 @@ function init() {
   const light = new THREE.HemisphereLight(0xffffff, 0x444444);
   scene.add(light);
 
-  const loader = new THREE.GLTFLoader();
+  const loader = new GLTFLoader();
   loader.load('models/3d.glb', function (gltf) {
     buildingModel = gltf.scene;
     scene.add(buildingModel);
