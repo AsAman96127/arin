@@ -1,0 +1,107 @@
+let scene, camera, renderer;
+let buildingModel, arrowModel;
+let arrows = [];
+let destination = '';
+const pathData = {
+  room1: [[0, 0, 0], [1, 0, 0], [2, 0, 0]],
+  lab: [[0, 0, 0], [0, 0, 1], [0, 0, 2]],
+  library: [[0, 0, 0], [1, 0, 1], [2, 0, 2]]
+};
+
+let arrowPositions = [];
+let currentPathIndex = 0;
+
+init();
+
+function init() {
+  // Scene setup
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 1.6, 3);
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.getElementById("arScene").appendChild(renderer.domElement);
+
+  // Lights
+  const light = new THREE.HemisphereLight(0xffffff, 0x444444);
+  scene.add(light);
+
+  // Load building model
+  const loader = new THREE.GLTFLoader();
+  loader.load('models/3d.glb', function(gltf) {
+    buildingModel = gltf.scene;
+    scene.add(buildingModel);
+  });
+
+  // Load arrow model
+  loader.load('models/arrow.glb', function(gltf) {
+    arrowModel = gltf.scene;
+  });
+
+  // UI events
+  document.getElementById("startBtn").addEventListener("click", startNavigation);
+  document.getElementById("stopBtn").addEventListener("click", stopNavigation);
+  document.getElementById("locationSelect").addEventListener("change", (e) => {
+    destination = e.target.value;
+  });
+
+  animate();
+}
+
+function startNavigation() {
+  if (!destination || !pathData[destination]) return;
+
+  // Activate camera (user interaction required)
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+    .then(stream => {
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.play();
+
+      const videoTexture = new THREE.VideoTexture(video);
+      scene.background = videoTexture;
+    })
+    .catch(err => {
+      console.error("Camera access error: ", err);
+    });
+
+  stopNavigation(); // Clear old arrows
+  arrowPositions = pathData[destination];
+  currentPathIndex = 0;
+  createArrowAtPosition(arrowPositions[currentPathIndex]);
+  animateArrows();
+}
+
+function createArrowAtPosition(position) {
+  const arrow = arrowModel.clone();
+  arrow.position.set(...position);
+  arrows.push(arrow);
+  scene.add(arrow);
+}
+
+function animateArrows() {
+  if (currentPathIndex < arrowPositions.length - 1) {
+    currentPathIndex++;
+    const nextPos = arrowPositions[currentPathIndex];
+
+    arrows.forEach(arrow => {
+      new TWEEN.Tween(arrow.position)
+        .to({ x: nextPos[0], y: nextPos[1], z: nextPos[2] }, 1000)
+        .start();
+    });
+
+    setTimeout(animateArrows, 1000);
+  }
+}
+
+function stopNavigation() {
+  arrows.forEach(a => scene.remove(a));
+  arrows = [];
+  currentPathIndex = 0;
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  TWEEN.update();
+  renderer.render(scene, camera);
+}
