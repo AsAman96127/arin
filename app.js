@@ -56,11 +56,16 @@ function enableCameraBackground() {
     .then(stream => {
       const video = document.createElement('video');
       video.setAttribute('playsinline', 'true');
+      video.autoplay = true;
+      video.muted = true;
       video.srcObject = stream;
-      video.play();
+      document.body.appendChild(video);
 
+      video.onloadedmetadata = () => {
+      video.play();
       const videoTexture = new THREE.VideoTexture(video);
       scene.background = videoTexture;
+      };
     })
     .catch(err => {
       console.error("Camera access failed:", err);
