@@ -2,6 +2,7 @@ let scene, camera, renderer;
 let buildingModel, arrowModel;
 let arrows = [];
 let destination = '';
+
 const pathData = {
   room1: [[0, 0, 0], [1, 0, 0], [2, 0, 0]],
   lab: [[0, 0, 0], [0, 0, 1], [0, 0, 2]],
@@ -14,7 +15,6 @@ let currentPathIndex = 0;
 init();
 
 function init() {
-  // Scene setup
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.position.set(0, 1.6, 3);
@@ -22,21 +22,19 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.getElementById("arScene").appendChild(renderer.domElement);
 
-  // Lights
   const light = new THREE.HemisphereLight(0xffffff, 0x444444);
   scene.add(light);
 
-  // Load models
   const loader = new THREE.GLTFLoader();
-  loader.load('models/3d.glb', function (gltf) {
+  loader.load('models/building.glb', function (gltf) {
     buildingModel = gltf.scene;
     scene.add(buildingModel);
   });
+
   loader.load('models/arrow.glb', function (gltf) {
     arrowModel = gltf.scene;
   });
 
-  // UI Events
   document.getElementById("startBtn").addEventListener("click", startNavigation);
   document.getElementById("stopBtn").addEventListener("click", stopNavigation);
   document.getElementById("locationSelect").addEventListener("change", (e) => {
@@ -56,24 +54,20 @@ function enableCameraBackground() {
       video.autoplay = true;
       video.srcObject = stream;
 
-      // Wait for the video to be ready
       video.onloadedmetadata = () => {
-        video.play();
-
-        const videoTexture = new THREE.VideoTexture(video);
-        videoTexture.minFilter = THREE.LinearFilter;
-        videoTexture.magFilter = THREE.LinearFilter;
-        videoTexture.format = THREE.RGBFormat;
-
-        scene.background = videoTexture;
+        setTimeout(() => {
+          video.play();
+          const videoTexture = new THREE.VideoTexture(video);
+          videoTexture.minFilter = THREE.LinearFilter;
+          videoTexture.magFilter = THREE.LinearFilter;
+          videoTexture.format = THREE.RGBFormat;
+          scene.background = videoTexture;
+        }, 100);
       };
-
-      // Optional: Attach video to DOM for debug
-      // document.body.appendChild(video);
     })
     .catch((err) => {
       console.error("Camera access error:", err);
-      scene.background = new THREE.Color(0x000000); // Fallback
+      scene.background = new THREE.Color(0x000000); // fallback
     });
 }
 
