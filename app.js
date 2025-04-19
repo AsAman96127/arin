@@ -22,7 +22,10 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.getElementById("arScene").appendChild(renderer.domElement);
 
-  // Lights
+  // Enable camera as background
+  enableCameraBackground();
+
+  // Lighting
   const light = new THREE.HemisphereLight(0xffffff, 0x444444);
   scene.add(light);
 
@@ -48,13 +51,11 @@ function init() {
   animate();
 }
 
-function startNavigation() {
-  if (!destination || !pathData[destination]) return;
-
-  // Activate camera (user interaction required)
+function enableCameraBackground() {
   navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
     .then(stream => {
       const video = document.createElement('video');
+      video.setAttribute('playsinline', 'true');
       video.srcObject = stream;
       video.play();
 
@@ -62,10 +63,14 @@ function startNavigation() {
       scene.background = videoTexture;
     })
     .catch(err => {
-      console.error("Camera access error: ", err);
+      console.error("Camera access failed:", err);
     });
+}
 
-  stopNavigation(); // Clear old arrows
+function startNavigation() {
+  stopNavigation();
+  if (!destination || !pathData[destination]) return;
+
   arrowPositions = pathData[destination];
   currentPathIndex = 0;
   createArrowAtPosition(arrowPositions[currentPathIndex]);
