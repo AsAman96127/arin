@@ -24,5 +24,28 @@
   <div id="arScene"></div>
 
   <script src="app.js"></script>
+</body><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AR Indoor Navigation</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="app.js"></script> <!-- Use module for ES Modules -->
+</head>
+<body>
+  <div id="ui">
+    <select id="locationSelect">
+      <option value="">Select Destination</option>
+      <option value="room1">Room 101</option>
+      <option value="lab">Computer Lab</option>
+      <option value="library">Library</option>
+    </select>
+    <button id="startBtn">Start Navigation</button>
+    <button id="stopBtn">Stop Navigation</button>
+  </div>
+  <div id="arScene"></div>
 </body>
+</html>
+
 </html>
