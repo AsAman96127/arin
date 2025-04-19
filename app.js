@@ -12,12 +12,16 @@ const pathData = {
 let arrowPositions = [];
 let currentPathIndex = 0;
 
-init();
+window.addEventListener('DOMContentLoaded', () => {
+  init();           // Initialize scene and models
+  enableCamera();   // Start camera immediately on load
+});
 
 function init() {
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.position.set(0, 1.6, 3);
+
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.getElementById("arScene").appendChild(renderer.domElement);
@@ -26,12 +30,13 @@ function init() {
   scene.add(light);
 
   const loader = new THREE.GLTFLoader();
-  loader.load('models/building.glb', function (gltf) {
+
+  loader.load('models/building.glb', (gltf) => {
     buildingModel = gltf.scene;
     scene.add(buildingModel);
   });
 
-  loader.load('models/arrow.glb', function (gltf) {
+  loader.load('models/arrow.glb', (gltf) => {
     arrowModel = gltf.scene;
   });
 
@@ -41,33 +46,31 @@ function init() {
     destination = e.target.value;
   });
 
-  enableCameraBackground();
   animate();
 }
 
-function enableCameraBackground() {
+function enableCamera() {
   navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
     .then((stream) => {
       const video = document.createElement('video');
-      video.setAttribute('playsinline', 'true');
+      video.setAttribute('playsinline', '');
+      video.setAttribute('autoplay', '');
       video.muted = true;
-      video.autoplay = true;
       video.srcObject = stream;
 
       video.onloadedmetadata = () => {
-        setTimeout(() => {
-          video.play();
-          const videoTexture = new THREE.VideoTexture(video);
-          videoTexture.minFilter = THREE.LinearFilter;
-          videoTexture.magFilter = THREE.LinearFilter;
-          videoTexture.format = THREE.RGBFormat;
-          scene.background = videoTexture;
-        }, 100);
+        video.play();
+        const videoTexture = new THREE.VideoTexture(video);
+        videoTexture.minFilter = THREE.LinearFilter;
+        videoTexture.magFilter = THREE.LinearFilter;
+        videoTexture.format = THREE.RGBFormat;
+
+        scene.background = videoTexture;
       };
     })
     .catch((err) => {
       console.error("Camera access error:", err);
-      scene.background = new THREE.Color(0x000000); // fallback
+      scene.background = new THREE.Color(0x000000); // fallback background
     });
 }
 
